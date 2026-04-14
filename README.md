@@ -175,7 +175,15 @@ cp examples/ollama.env .env
 
 5. Paste it into Bridget and tap **Connect**
 
-> **Remote access:** If Bridget isn't on the same network, expose the server with `ngrok http 8080` and use the ngrok URL.
+> **Remote access:** If Bridget isn't on the same network (which is the common case — CarPlay, cellular, different WiFi), expose the server with ngrok:
+>
+> ```bash
+> ngrok http 8080
+> ```
+>
+> Use the `https://...ngrok-free.app` URL in your endpoint config. The URL stays alive as long as the ngrok process is running. If the process dies or the machine restarts, you'll need to start ngrok again (the URL changes each time on the free tier). For a stable URL, create a free ngrok account and reserve a subdomain.
+>
+> Bridget automatically handles ngrok's free-tier interstitial page — no extra setup needed.
 
 ---
 
