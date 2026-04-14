@@ -100,6 +100,26 @@ Your STT and TTS tools have specific function signatures. Don't guess — check 
 
 Internal tools often return JSON strings, not Python dicts. If your TTS tool returns `'{"path": "/tmp/audio.ogg"}'`, you need `json.loads()` before calling `.get()` on it.
 
+### Handle None responses from your agent
+
+`result.get("final_response", "")` returns `None` when the key exists but the value is None — which happens in many error paths. This breaks TTS and sends `{"text": null}` to Bridget. Use `(result.get("final_response") or "")` to coalesce None to empty string.
+
+### Check attribute/method names against your framework's actual API
+
+Don't guess. If you think the attribute is `system_prompt_override`, verify it exists. A wrong attribute name silently does nothing in Python — no error, just ignored. Read the class source or docs.
+
+### Clean up ALL temp files
+
+The handler creates temp files for both input audio (STT) and output audio (TTS). Clean up both in a `finally` block. A missed temp file leaks to disk on every request.
+
+### Verify imports at module level
+
+Don't import inside a `try` or `finally` block and use it outside that scope. Run `python -c "from your_module import *"` to catch import errors without restarting the server. Import bugs caused 3 unnecessary restarts during our testing.
+
+### Do a full trace before first deployment
+
+Read the entire handler top to bottom. Trace every variable, every import, every function call. The "fix one bug → restart → find next bug" loop caused 6+ restarts over 30 minutes during our first integration. A single careful read-through catches them all. Only restart when you're confident the whole handler runs clean.
+
 ### Test each stage independently
 
 Before testing the full pipeline, verify each stage works on its own:
