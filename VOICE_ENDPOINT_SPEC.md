@@ -1,0 +1,82 @@
+# Bridget Voice Endpoint Specification
+
+This is the protocol that Bridget (the iOS app) speaks. If you're building a native voice endpoint into your agent, implement this spec. If you're using `bridget-voice-server`, it already implements this — you don't need to do anything.
+
+---
+
+## Endpoint
+
+```
+POST /v1/audio/voice_chat
+```
+
+## Request
+
+**Headers:**
+- `Authorization: Bearer {api_key}` (omit if no auth required)
+- `Content-Type: multipart/form-data`
+
+**Form fields:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `audio` | file | Yes | OGG/Opus encoded audio (filename: `voice.ogg`, MIME: `audio/ogg; codecs=opus`) |
+| `system_prompt` | string | No | Response preference instruction (e.g., "Always respond with voice") |
+| `session_id` | string | No | Conversation session ID for continuity (format: `bridget-{UUID}`). Create a new one if not provided. |
+
+## Response — Primary (audio)
+
+```
+HTTP 200
+Content-Type: audio/ogg
+X-Transcript-Text: "What the user said"
+X-Response-Text: "What the agent replied"
+X-Session-Id: "bridget-550e8400-..."
+Body: raw OGG/Opus audio bytes
+```
+
+## Response — Fallback (text, if TTS fails)
+
+```
+HTTP 200
+Content-Type: application/json
+X-Transcript-Text: "What the user said"
+X-Response-Text: "What the agent replied"
+X-Session-Id: "bridget-550e8400-..."
+Body: {"text": "Agent's text response"}
+```
+
+Bridget handles both. Audio is played directly. Text is read aloud via on-device TTS.
+
+## Response — Bridget also accepts these formats
+
+Bridget's parser is lenient. These all work:
+
+| Content-Type | Body | Behavior |
+|-------------|------|----------|
+| `audio/*` or `*ogg*` | Raw audio bytes | Plays directly |
+| `application/json` | `{"text": "..."}` | Reads aloud |
+| `application/json` | `{"response": "..."}` | Reads aloud |
+| `application/json` | `{"message": "..."}` | Reads aloud |
+| `application/json` | `{"choices": [{"message": {"content": "..."}}]}` | OpenAI format, reads aloud |
+| `application/json` | `{"audio_url": "https://..."}` | Downloads and plays |
+| `text/plain` | Raw text | Reads aloud |
+
+## Errors
+
+| Code | Body | Meaning |
+|------|------|---------|
+| 400 | `{"error": "Transcription failed"}` | Couldn't understand the audio |
+| 401 | `{"error": "Invalid API key"}` | Wrong or missing API key |
+| 502 | `{"error": "Agent unreachable"}` | Backend agent didn't respond |
+
+## Connection Test
+
+Bridget tests the endpoint by sending a minimal silent audio file (20ms of silence encoded as OGG/Opus). A successful response (any 200) confirms the full pipeline works.
+
+## Notes
+
+- **Timeout:** Bridget waits up to 180 seconds for a response. The STT → LLM → TTS pipeline can be slow.
+- **Audio format:** Bridget always sends OGG/Opus at 48kHz mono. Your STT must handle this format.
+- **Session continuity:** If you return `X-Session-Id`, Bridget uses it on subsequent requests. This lets the agent maintain conversation history.
+- **System prompt:** This is the user's response preference, not a personality prompt. Common values: "Always respond with a voice message, never text." or empty (let agent decide).
