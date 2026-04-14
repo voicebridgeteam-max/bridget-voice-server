@@ -156,7 +156,12 @@ Short single-line responses work fine. Multi-paragraph responses crash the serve
 
 ### Session history must be loaded, not just saved
 
-Bridget sends `session_id` on every request. You must **load the conversation history** for that session and pass it to the agent on each turn. A common mistake: the agent framework auto-saves messages after each turn (e.g., `persist_session=True`), but the handler never loads them back — so every request gets a blank slate. Saving is not enough. You must also retrieve.
+Bridget sends `session_id` on every request. You must **load the conversation history** for that session and pass it to the agent on each turn. This is a two-part requirement:
+
+1. **Load** — Retrieve prior messages for the session_id before calling the agent
+2. **Save** — Pass the session/DB handle to the agent so new turns get persisted
+
+A common mistake: the framework has auto-save (e.g., `persist_session=True`) but the handler doesn't pass the DB instance to the agent constructor. The save method silently no-ops if the DB reference is None. History loads correctly, but new turns vanish. Wire up both directions.
 
 ## Notes
 
