@@ -154,6 +154,10 @@ safe_text = response_text.replace("\n", " ").replace("\r", " ").replace("\0", ""
 
 Short single-line responses work fine. Multi-paragraph responses crash the server without this fix.
 
+### Session history must be loaded, not just saved
+
+Bridget sends `session_id` on every request. You must **load the conversation history** for that session and pass it to the agent on each turn. A common mistake: the agent framework auto-saves messages after each turn (e.g., `persist_session=True`), but the handler never loads them back — so every request gets a blank slate. Saving is not enough. You must also retrieve.
+
 ## Notes
 
 - **Timeout:** Bridget waits up to 180 seconds for a response. The STT → LLM → TTS pipeline can be slow.
