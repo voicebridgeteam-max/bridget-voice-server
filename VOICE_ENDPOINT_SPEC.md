@@ -129,12 +129,20 @@ Before testing the full pipeline, verify each stage works on its own:
 
 If any stage fails, the endpoint will fail. Debug them separately.
 
+### Content-Type header must match actual audio bytes
+
+If your TTS outputs MP3, return `Content-Type: audio/mpeg`, not `audio/ogg`. Bridget detects audio from the Content-Type header — a mismatch can cause playback to fail and fall back to reading text aloud. Detect the actual format from the file extension or magic bytes and set the header accordingly.
+
 ### Server binding and network access
 
 - **Host must be `0.0.0.0`**, not `127.0.0.1` or `localhost`. Otherwise only the local machine can connect.
 - **Firewall:** macOS blocks incoming connections by default. Allow your Python process or disable the firewall.
 - **Remote access:** If Bridget isn't on the same network (which is the common case — CarPlay, cellular), use `ngrok http 8080` or deploy to a VPS with a public IP.
 - **Full restart required** after config changes. Don't just reload — kill the old process and start fresh.
+
+### ngrok tunnel goes stale after server restart
+
+When you restart your server, ngrok's tunnel to the port goes stale (ERR_NGROK_3004). You must restart ngrok after restarting the server. For production, use a proper reverse proxy (nginx, caddy) or ngrok's paid tier with auto-reconnect.
 
 ## Notes
 
