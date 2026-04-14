@@ -74,6 +74,48 @@ Bridget's parser is lenient. These all work:
 
 Bridget tests the endpoint by sending a minimal silent audio file (20ms of silence encoded as OGG/Opus). A successful response (any 200) confirms the full pipeline works.
 
+## Common Pitfalls (from real-world testing)
+
+These bugs were discovered during live integration testing. If you're building the endpoint natively, watch for every one of these.
+
+### Async event loop blocking (critical)
+
+STT (Whisper) and TTS are heavy CPU operations. If you call them synchronously inside an async handler (FastAPI, aiohttp), they block the entire event loop and the server hangs forever. Bridget times out after 180 seconds.
+
+**Fix:** Wrap all synchronous calls in `asyncio.to_thread()`:
+```python
+text = await asyncio.to_thread(transcribe_audio, audio_path)
+audio = await asyncio.to_thread(text_to_speech, response_text)
+```
+
+### Model parameter must be explicit
+
+Don't create your LLM agent without specifying a model. Sending `model: ""` to the API returns HTTP 400. Always pass the model name explicitly.
+
+### Check your tool signatures
+
+Your STT and TTS tools have specific function signatures. Don't guess — check them. Common mistake: calling `tts(text, output_format="ogg")` when the function expects `tts(text, output_path="/tmp/out.ogg")`.
+
+### Parse tool output formats
+
+Internal tools often return JSON strings, not Python dicts. If your TTS tool returns `'{"path": "/tmp/audio.ogg"}'`, you need `json.loads()` before calling `.get()` on it.
+
+### Test each stage independently
+
+Before testing the full pipeline, verify each stage works on its own:
+1. Can you transcribe an OGG file? (STT)
+2. Can you get a text response from your LLM? (Agent)
+3. Can you generate an audio file from text? (TTS)
+
+If any stage fails, the endpoint will fail. Debug them separately.
+
+### Server binding and network access
+
+- **Host must be `0.0.0.0`**, not `127.0.0.1` or `localhost`. Otherwise only the local machine can connect.
+- **Firewall:** macOS blocks incoming connections by default. Allow your Python process or disable the firewall.
+- **Remote access:** If Bridget isn't on the same network (which is the common case — CarPlay, cellular), use `ngrok http 8080` or deploy to a VPS with a public IP.
+- **Full restart required** after config changes. Don't just reload — kill the old process and start fresh.
+
 ## Notes
 
 - **Timeout:** Bridget waits up to 180 seconds for a response. The STT → LLM → TTS pipeline can be slow.
