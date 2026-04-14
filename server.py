@@ -220,6 +220,10 @@ async def voice_chat(
 
     history.append({"role": "assistant", "content": response_text})
 
+    # Sanitize header values — newlines in LLM output crash HTTP frameworks
+    safe_input = input_text.replace("\n", " ").replace("\r", " ").replace("\0", "")
+    safe_response = response_text.replace("\n", " ").replace("\r", " ").replace("\0", "")
+
     # 3. TTS
     try:
         audio_bytes = await text_to_speech(response_text)
@@ -227,7 +231,7 @@ async def voice_chat(
         # Fallback: return text if TTS fails
         return JSONResponse(
             content={"text": response_text},
-            headers={"X-Transcript-Text": input_text, "X-Response-Text": response_text,
+            headers={"X-Transcript-Text": safe_input, "X-Response-Text": safe_response,
                      "X-Session-Id": session_id},
         )
 
@@ -235,8 +239,8 @@ async def voice_chat(
         content=audio_bytes,
         media_type="audio/ogg",
         headers={
-            "X-Transcript-Text": input_text,
-            "X-Response-Text": response_text,
+            "X-Transcript-Text": safe_input,
+            "X-Response-Text": safe_response,
             "X-Session-Id": session_id,
         },
     )

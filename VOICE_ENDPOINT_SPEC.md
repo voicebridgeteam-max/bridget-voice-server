@@ -144,6 +144,16 @@ If your TTS outputs MP3, return `Content-Type: audio/mpeg`, not `audio/ogg`. Bri
 
 When you restart your server, ngrok's tunnel to the port goes stale (ERR_NGROK_3004). You must restart ngrok after restarting the server. For production, use a proper reverse proxy (nginx, caddy) or ngrok's paid tier with auto-reconnect.
 
+### Sanitize response header values
+
+`X-Transcript-Text` and `X-Response-Text` contain raw LLM text, which can include newlines (`\n`, `\r`) in multi-paragraph responses. Most HTTP frameworks (aiohttp, uvicorn) reject headers with newlines as a security measure (header injection). Replace newlines and null bytes with spaces before setting headers:
+
+```python
+safe_text = response_text.replace("\n", " ").replace("\r", " ").replace("\0", "")
+```
+
+Short single-line responses work fine. Multi-paragraph responses crash the server without this fix.
+
 ## Notes
 
 - **Timeout:** Bridget waits up to 180 seconds for a response. The STT → LLM → TTS pipeline can be slow.
