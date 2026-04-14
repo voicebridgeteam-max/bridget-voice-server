@@ -20,6 +20,16 @@ Bridget plays the reply
 
 ---
 
+## Two Paths to Bridget Compatibility
+
+**Path 1: Deploy this bridge server** — Your agent has a text API (Ollama, OpenAI, Claude Code CLI, etc.). Deploy this server alongside it. It wraps your text API with voice. See [Quickstart](#quickstart) below.
+
+**Path 2: Build the endpoint natively** — Your agent already runs an HTTP server (Hermes, OpenClaw, custom FastAPI). Add the voice endpoint directly — better performance, no middleware. See [NATIVE_IMPLEMENTATION.md](NATIVE_IMPLEMENTATION.md) for the step-by-step guide.
+
+Not sure which? If your agent can modify its own code and has an HTTP server, go native. Otherwise, deploy the bridge server.
+
+---
+
 ## Quickstart
 
 ```bash
@@ -86,7 +96,9 @@ AGENT_COMMAND=python my_agent.py
 
 Your agent needs to add one route: `POST /v1/audio/voice_chat`
 
-See [VOICE_ENDPOINT_SPEC.md](VOICE_ENDPOINT_SPEC.md) for the full protocol. Give the spec to your agent and it will build the endpoint.
+- **[NATIVE_IMPLEMENTATION.md](NATIVE_IMPLEMENTATION.md)** — Step-by-step build guide with code examples and all known pitfalls. Start here.
+- **[VOICE_ENDPOINT_SPEC.md](VOICE_ENDPOINT_SPEC.md)** — Protocol reference (request/response format).
+- **[TESTING.md](TESTING.md)** — Curl commands to verify each stage before connecting Bridget.
 
 ---
 

@@ -139,13 +139,14 @@ async def tts_elevenlabs(text: str) -> bytes:
         return resp.content
 
 
-async def text_to_speech(text: str) -> bytes:
+async def text_to_speech(text: str) -> tuple[bytes, str]:
+    """Returns (audio_bytes, media_type)."""
     if TTS_PROVIDER == "edge_tts":
-        return await tts_edge(text)
+        return await tts_edge(text), "audio/mpeg"  # Edge-TTS outputs MP3
     elif TTS_PROVIDER == "openai":
-        return await tts_openai(text)
+        return await tts_openai(text), "audio/ogg"  # OpenAI TTS with opus format
     elif TTS_PROVIDER == "elevenlabs":
-        return await tts_elevenlabs(text)
+        return await tts_elevenlabs(text), "audio/mpeg"  # ElevenLabs outputs MP3
     else:
         raise ValueError(f"Unknown TTS provider: {TTS_PROVIDER}")
 
@@ -226,7 +227,7 @@ async def voice_chat(
 
     # 3. TTS
     try:
-        audio_bytes = await text_to_speech(response_text)
+        audio_bytes, media_type = await text_to_speech(response_text)
     except Exception:
         # Fallback: return text if TTS fails
         return JSONResponse(
@@ -237,7 +238,7 @@ async def voice_chat(
 
     return Response(
         content=audio_bytes,
-        media_type="audio/ogg",
+        media_type=media_type,
         headers={
             "X-Transcript-Text": safe_input,
             "X-Response-Text": safe_response,
