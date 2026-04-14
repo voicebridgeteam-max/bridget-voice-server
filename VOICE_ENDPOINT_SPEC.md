@@ -163,6 +163,10 @@ Bridget sends `session_id` on every request. You must **load the conversation hi
 
 A common mistake: the framework has auto-save (e.g., `persist_session=True`) but the handler doesn't pass the DB instance to the agent constructor. The save method silently no-ops if the DB reference is None. History loads correctly, but new turns vanish. Wire up both directions.
 
+### Load your agent's identity and context files
+
+Don't create the agent with flags like `skip_context_files=True` or `skip_memory=True` for the voice endpoint. These strip the agent's personality, name, and memory — it responds as a generic base model instead of itself. Voice requests should load the same identity and context as every other channel (Telegram, Discord, etc.).
+
 ## Notes
 
 - **Timeout:** Bridget waits up to 180 seconds for a response. The STT → LLM → TTS pipeline can be slow.
