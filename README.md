@@ -20,6 +20,21 @@ Bridget plays the reply
 
 ---
 
+## Before You Start
+
+You need one thing: a **free ngrok account** for remote access (so Bridget on your phone can reach your server).
+
+1. Sign up at [ngrok.com/signup](https://dashboard.ngrok.com/signup) (free, 30 seconds)
+2. Copy your authtoken from [your dashboard](https://dashboard.ngrok.com/get-started/your-authtoken)
+3. Install ngrok: `brew install ngrok` or download from [ngrok.com/download](https://ngrok.com/download)
+4. Authenticate: `ngrok config add-authtoken YOUR_TOKEN`
+
+You only do this once. After that, `ngrok http 8080` gives you a public URL anytime.
+
+> **Why ngrok?** Bridget runs on your iPhone. Your server runs on your computer. They're almost never on the same network (CarPlay, cellular, different WiFi). ngrok creates a public tunnel so your phone can reach your server from anywhere.
+
+---
+
 ## Two Paths to Bridget Compatibility
 
 **Path 1: Deploy this bridge server** — Your agent has a text API (Ollama, OpenAI, Claude Code CLI, etc.). Deploy this server alongside it. It wraps your text API with voice. See [Quickstart](#quickstart) below.
@@ -173,29 +188,23 @@ cp examples/ollama.env .env
 ## Connecting from Bridget
 
 1. Start the server: `python server.py`
-2. Open Bridget on your iPhone
-3. Tap **Direct API** → **Ask My Agent**
-4. Your agent (or you) provides this JSON to Bridget:
+2. Start ngrok: `ngrok http 8080`
+3. Copy the `https://...ngrok-free.app` URL from ngrok's output
+4. Open Bridget on your iPhone
+5. Tap **Direct API** → select your agent type → follow the setup
+6. When asked for connection details, provide this JSON:
 
 ```json
 {
-  "endpoint_url": "http://YOUR_IP:8080/v1/audio/voice_chat",
+  "endpoint_url": "https://YOUR-NGROK-URL.ngrok-free.app/v1/audio/voice_chat",
   "api_key": "",
   "agent_name": "My Agent"
 }
 ```
 
-5. Paste it into Bridget and tap **Connect**
+7. Paste it into Bridget and tap **Connect**
 
-> **Remote access:** If Bridget isn't on the same network (which is the common case — CarPlay, cellular, different WiFi), expose the server with ngrok:
->
-> ```bash
-> ngrok http 8080
-> ```
->
-> Use the `https://...ngrok-free.app` URL in your endpoint config. The URL stays alive as long as the ngrok process is running. If the process dies or the machine restarts, you'll need to start ngrok again (the URL changes each time on the free tier). For a stable URL, create a free ngrok account and reserve a subdomain.
->
-> Bridget automatically handles ngrok's free-tier interstitial page — no extra setup needed.
+> **Note:** The ngrok URL changes each time you restart it (free tier). Keep ngrok running. If your machine sleeps or the process dies, restart both the server and ngrok. Bridget handles ngrok's free-tier interstitial page automatically.
 
 ---
 
