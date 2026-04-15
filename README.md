@@ -22,14 +22,28 @@ Bridget plays the reply
 
 ## Before You Start
 
-You need one thing: a **free ngrok account** for remote access (so Bridget on your phone can reach your server).
+You need two things:
+
+### 1. ffmpeg (required by Whisper for audio decoding)
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu/Debian
+sudo apt install ffmpeg
+
+# Or download from https://ffmpeg.org/download.html
+```
+Verify: `ffmpeg -version`
+
+### 2. A free ngrok account (for remote access)
 
 1. Sign up at [ngrok.com/signup](https://dashboard.ngrok.com/signup) (free, 30 seconds)
 2. Copy your authtoken from [your dashboard](https://dashboard.ngrok.com/get-started/your-authtoken)
 3. Install ngrok: `brew install ngrok` or download from [ngrok.com/download](https://ngrok.com/download)
 4. Authenticate: `ngrok config add-authtoken YOUR_TOKEN`
 
-You only do this once. After that, `ngrok http 8080` gives you a public URL anytime.
+You only do these once.
 
 > **Why ngrok?** Bridget runs on your iPhone. Your server runs on your computer. They're almost never on the same network (CarPlay, cellular, different WiFi). ngrok creates a public tunnel so your phone can reach your server from anywhere.
 

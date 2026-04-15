@@ -12,10 +12,12 @@ If you just want to deploy the bridge server instead, see the [README](README.md
 
 Before you start, verify you have:
 
+- [ ] **ffmpeg** installed — Whisper requires it for audio decoding. Install: `brew install ffmpeg` (macOS) or `sudo apt install ffmpeg` (Linux). Verify: `ffmpeg -version`. **This is the #1 missing dependency.**
 - [ ] An HTTP server framework (FastAPI, aiohttp, Flask, etc.)
 - [ ] An STT engine (Whisper, Deepgram, etc.) — test it: can you transcribe an audio file?
 - [ ] A TTS engine (Edge-TTS, ElevenLabs, OpenAI TTS, etc.) — test it: can you generate audio from text?
 - [ ] Your AI agent/LLM callable from code — test it: can you get a text response from a prompt?
+- [ ] **ngrok** installed and authenticated — for remote access from Bridget. See [README](README.md#before-you-start).
 
 If any of these don't work yet, fix them first. The voice endpoint chains all four together.
 
