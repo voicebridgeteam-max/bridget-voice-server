@@ -205,6 +205,9 @@ async def voice_chat(
             return JSONResponse(status_code=400, content={"error": f"Transcription failed: {e}"})
 
         if not input_text:
+            # Bridget sends silent audio as a connection test — return 200 to confirm the pipeline works
+            if "connection test" in system_prompt.lower():
+                return JSONResponse(content={"text": "Connection test successful."})
             return JSONResponse(status_code=400, content={"error": "Transcription returned empty text"})
 
     finally:
