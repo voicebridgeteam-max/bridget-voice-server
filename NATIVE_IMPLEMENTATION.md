@@ -204,9 +204,11 @@ Convert the response text to audio. Return it with the correct headers.
         # Detect actual format and set correct Content-Type
         content_type = detect_content_type(tmp_out.name)
 
-        # Sanitize header values — newlines crash HTTP frameworks
+        # Sanitize header values — newlines and non-Latin-1 chars crash HTTP frameworks
         safe_transcript = text.replace("\n", " ").replace("\r", " ").replace("\0", "")
+        safe_transcript = safe_transcript.encode("latin-1", errors="replace").decode("latin-1")
         safe_response = response_text.replace("\n", " ").replace("\r", " ").replace("\0", "")
+        safe_response = safe_response.encode("latin-1", errors="replace").decode("latin-1")
 
         return Response(
             content=audio_bytes,
@@ -222,8 +224,16 @@ Convert the response text to audio. Return it with the correct headers.
 **WARNING — Content-Type must match actual bytes:**
 If your TTS outputs MP3, return `audio/mpeg`. If it outputs OGG, return `audio/ogg`. A mismatch causes playback failures in Bridget — it falls back to reading text aloud.
 
-**WARNING — sanitize response headers:**
-LLM responses contain newlines. HTTP headers with `\n` or `\r` are rejected by aiohttp, uvicorn, and most frameworks as potential header injection. Replace them with spaces.
+**WARNING — sanitize response headers (two issues):**
+LLM responses contain newlines AND non-ASCII characters (em dashes —, smart quotes, emoji). Both crash HTTP headers:
+1. Newlines (`\n`, `\r`) are rejected as potential header injection
+2. Non-Latin-1 characters (anything outside 0-255) crash Starlette/uvicorn silently
+
+```python
+def safe_header(s: str) -> str:
+    s = s.replace("\n", " ").replace("\r", " ").replace("\0", "")
+    return s.encode("latin-1", errors="replace").decode("latin-1")
+```
 
 **WARNING — check your TTS function's actual signature:**
 Don't guess the arguments. If the function expects `tts(text, output_path)`, don't call `tts(text, output_format="ogg")`. Wrong keyword arguments cause TypeErrors.
@@ -394,7 +404,7 @@ Read the entire handler top to bottom. Trace every variable, every import, every
 - [ ] TTS function signature matches your actual tool
 - [ ] Tool outputs parsed (JSON strings → dicts)
 - [ ] Content-Type matches actual audio format
-- [ ] Response headers sanitized (no newlines)
+- [ ] Response headers sanitized (no newlines, no non-Latin-1 characters)
 - [ ] All temp files cleaned up in finally blocks
 - [ ] Host bound to `0.0.0.0`
 - [ ] Server fully restarted (not just reloaded)

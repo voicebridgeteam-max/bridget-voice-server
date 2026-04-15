@@ -225,9 +225,13 @@ async def voice_chat(
 
     history.append({"role": "assistant", "content": response_text})
 
-    # Sanitize header values — newlines in LLM output crash HTTP frameworks
-    safe_input = input_text.replace("\n", " ").replace("\r", " ").replace("\0", "")
-    safe_response = response_text.replace("\n", " ").replace("\r", " ").replace("\0", "")
+    # Sanitize header values — must be Latin-1 encodable for HTTP headers
+    def _safe_header(s: str) -> str:
+        s = s.replace("\n", " ").replace("\r", " ").replace("\0", "")
+        return s.encode("latin-1", errors="replace").decode("latin-1")
+
+    safe_input = _safe_header(input_text)
+    safe_response = _safe_header(response_text)
 
     # 3. TTS
     try:
