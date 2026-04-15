@@ -17,6 +17,7 @@ import os
 import tempfile
 import time
 import uuid
+from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, Header, Request, UploadFile
@@ -176,7 +177,7 @@ async def voice_chat(
     audio: UploadFile = File(...),
     system_prompt: str = Form(default=""),
     session_id: str = Form(default=""),
-    authorization: str | None = Header(default=None),
+    authorization: Optional[str] = Header(default=None),
 ):
     # Auth check
     if API_KEY:
