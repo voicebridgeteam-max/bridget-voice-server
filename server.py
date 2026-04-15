@@ -218,7 +218,7 @@ async def voice_chat(
     try:
         backend = get_backend()
         response_text = await asyncio.to_thread(
-            backend.send_message, input_text, history, system_prompt
+            backend.send_message, input_text, history, system_prompt, session_id
         )
     except Exception as e:
         return JSONResponse(status_code=502, content={"error": f"Agent error: {e}"})

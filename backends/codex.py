@@ -18,7 +18,7 @@ Do NOT mention that you can't generate audio, create files, or access tools. \
 Just respond to what the user said as a helpful voice assistant."""
 
 
-def send_message(text: str, history: list[dict], system_prompt: str = "") -> str:
+def send_message(text: str, history: list, system_prompt: str = "", session_id: str = "") -> str:
     context = BASE_CONTEXT
     if system_prompt:
         context = f"{BASE_CONTEXT}\n\nAdditional instruction: {system_prompt}"

@@ -13,7 +13,7 @@ AGENT_API_KEY = os.getenv("AGENT_API_KEY", "")
 AGENT_MODEL = os.getenv("AGENT_MODEL", "llama3")
 
 
-def send_message(text: str, history: list[dict], system_prompt: str = "") -> str:
+def send_message(text: str, history: list, system_prompt: str = "", session_id: str = "") -> str:
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})

@@ -15,7 +15,7 @@ import subprocess
 AGENT_COMMAND = os.getenv("AGENT_COMMAND", "")
 
 
-def send_message(text: str, history: list[dict], system_prompt: str = "") -> str:
+def send_message(text: str, history: list, system_prompt: str = "", session_id: str = "") -> str:
     if not AGENT_COMMAND:
         raise RuntimeError("AGENT_COMMAND not set in .env")
 
