@@ -1,5 +1,7 @@
 # bridget-voice-server
 
+> **Using Claude Code?** You don't need this server. Use the [Bridget Channel Plugin](https://github.com/voicebridgeteam-max/Bridget/tree/main/BridgetChannel) instead — it connects directly to your Claude Code session with on-device STT/TTS, full project access, permission relay, and $0 cost.
+
 Give any AI agent a voice. This open-source server sits between [Bridget](https://bridget.app) (the iOS voice app) and your agent's text API. It handles speech-to-text and text-to-speech so your agent doesn't have to.
 
 ```
