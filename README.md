@@ -63,14 +63,28 @@ Not sure which? If your agent can modify its own code and has an HTTP server, go
 
 ## Quickstart
 
+**One command** — installs everything, starts the server and ngrok, shows a QR code:
+
 ```bash
 git clone https://github.com/voicebridgeteam-max/bridget-voice-server
 cd bridget-voice-server
+./start.sh
+```
+
+Scan the QR code with your iPhone camera to connect Bridget automatically.
+
+<details>
+<summary>Manual setup (if you prefer)</summary>
+
+```bash
 cp config.env.example .env
 # Edit .env — set AGENT_API_URL to your agent's text API
 pip install -r requirements.txt
 python server.py
+# In another terminal:
+./connect.sh 8080   # starts ngrok + shows QR code
 ```
+</details>
 
 The server starts on `http://0.0.0.0:8080`. Bridget connects to `http://YOUR_IP:8080/v1/audio/voice_chat`.
 

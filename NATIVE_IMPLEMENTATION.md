@@ -298,10 +298,19 @@ Your endpoint must be reachable from Bridget (an iPhone, usually on a different 
 4. If blocked: check your firewall settings. Allow Python or your server process.
 
 **Remote access (different network, CarPlay, cellular):**
+
+Use the `connect.sh` script from this repo — it starts ngrok and shows a QR code that auto-connects Bridget:
+
 ```bash
-ngrok http 8080
+# Clone this repo if you haven't:
+git clone https://github.com/voicebridgeteam-max/bridget-voice-server
+# Run connect.sh with your agent's port:
+./bridget-voice-server/connect.sh 8080
 ```
-Use the `https://...ngrok-free.app` URL. This is the most common setup — Bridget is rarely on the same network as the agent.
+
+The QR code encodes a deep link — scan it with your iPhone camera and Bridget opens and connects automatically. The script also copies the URL to your clipboard.
+
+**Or manually:** `ngrok http 8080` and paste the URL in Bridget.
 
 **ngrok gotcha:** When you restart your server, the ngrok tunnel goes stale. Restart ngrok too.
 
